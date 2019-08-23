@@ -1,53 +1,66 @@
 <?php
-function register(){
-    $myfile=fopen("login", "a") or die("Unable to open file!");
-    $txt=$_POST['pseudo'] . ':'. sha1($_POST['password']);
-    $handle=fopen("login", "r");
+function register()
+{
+    $pseudoSaisi = trim($_POST['pseudo']);
+    $mdpSaisi = sha1(trim($_POST['password']));
+    $array = array($pseudoSaisi);
+    $userExist = false;
+    try
+    {
+        $bdd = new PDO('mysql:host=localhost;dbname=workshop;charset=utf8', 'root', '', array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
 
-    while (($ligne=fgets($handle)) !==false) {
-        $a=explode(':', $ligne);
-        $loginBdd=$a[0];
-        $_POST['pseudo']==$loginBdd? $etat=2: null;
     }
-
-    if ($etat !== 2) {
-        fwrite($myfile, "\n". $txt);
-        fclose($myfile);
-        $_SESSION['pseudo']=$_POST['pseudo'];
-        header('Location: index.php');
-    }else{
-        echo 'Pseudo déja utilisé';
+    catch(Exception $e)
+    {
+        die('Erreur : '.$e->getMessage());
     }
+     
+    $reponse = $bdd->prepare('SELECT * FROM `users` WHERE `pseudo` = ? ');
+    $reponse->execute($array);
+    while ($donnees = $reponse->fetch())
+    {
+        $userExist = true;
+    }
+    $reponse->closeCursor();
+     if(!$userExist)
+     {
+         array_push($array,$mdpSaisi);
+         $insertUser = $bdd->prepare('INSERT INTO `users`(`password_hash`, `pseudo`) VALUES (?, ?)');
+         $insertUser->execute($array);
+         $_SESSION['pseudo'] = $pseudoSaisi;
+        header('Location: logged.php');
+     }
+     else
+     {
+         echo "Nom d'utilisateur déjà utilisé";
+     }
+    $insertUser->closeCursor();
 
 }
-function login(){
-    $handle=fopen("login", "r");
-$logged=false;
-    if ($handle) {
-        while (($line=fgets($handle)) !==false) {
-            // process the line read.
-            $a=explode(':', $line);
-            $loginBdd=$a[0];
-            $passBdd=$a[1];
-            trim($_POST['pseudo'])==trim($loginBdd) && hash_equals($loginBdd, $_POST['pseudo']) ? $logged=true: null;
 
-        }
 
-        if ($logged) {
-            $_SESSION['pseudo'] = $_POST['pseudo'];
-            header('Location: logged.php');
-            exit;
-        }
+function loginBdd()
+{
+    $pseudoSaisi = trim($_POST['pseudo']);
+    $mdpSaisi = sha1(trim($_POST['password']));
+    $arrayLogin = array($pseudoSaisi, $mdpSaisi);
+    try
+    {
+        $bdd = new PDO('mysql:host=localhost;dbname=workshop;charset=utf8', 'root', '', array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
 
-        else {
-            echo 'Invalid';
-        }
-
-        fclose($handle);
     }
-
-    else {
-        // error opening the file.
+    catch(Exception $e)
+    {
+        die('Erreur : '.$e->getMessage());
     }
+    $resp = $bdd->prepare('SELECT * FROM `users` WHERE `pseudo` = ? AND `password_hash` = ?');
+    $resp->execute($arrayLogin);
+    while ($data = $resp->fetch())
+    {
+        $_SESSION['pseudo'] = $pseudoSaisi;
+        header('Location: logged.php');
+    }   
+    
 
+    $resp->closeCursor();
 }

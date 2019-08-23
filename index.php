@@ -1,16 +1,19 @@
 <?php 
 session_start();
 include('fonctions.php');
-if(!empty($_SESSION['pseudo'])){
+
+if(!empty($_SESSION['pseudo']))
+{
     header('Location: logged.php');
 }
 
 
-if(isset($_POST) && !empty($_POST)) {
-login();
+if(isset($_POST) && !empty($_POST))
+{
+loginBdd();
 }
-
-else {
+else
+{
     echo 'Not posted';
 }
 

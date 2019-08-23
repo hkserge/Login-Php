@@ -1,8 +1,11 @@
 <?php
 session_start();
-if (!isset($_SESSION['pseudo'])){
+if (!isset($_SESSION['pseudo']))
+{
     header('Location: index.php');
-}else{
+}
+else
+{
     echo '<!DOCTYPE html>
     <html lang="fr">
     <head>
@@ -21,4 +24,4 @@ if (!isset($_SESSION['pseudo'])){
     </body>
     </html>';
 }
-?>
+

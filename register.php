@@ -1,8 +1,8 @@
 <?php 
 session_start();
-$etat=0;
 include('fonctions.php');
-if (isset($_POST['pseudo']) && !empty($_POST['pseudo'] && !empty($_POST['password']))) {
+if (isset($_POST['pseudo']) && !empty($_POST['pseudo'] && !empty($_POST['password'])))
+{
 register();
 }
 
